@@ -33,6 +33,7 @@ export default function App() {
         onRemoveItem={handleRemoveItems}
         onSelectItem={handleSelectItem}
         onClearList={handleClearList}
+        showError={showError}
       />
       <Stats items={items} />
     </div>
@@ -83,7 +84,13 @@ function Form({ onAddItems }) {
     </form>
   );
 }
-function PackingList({ items, onRemoveItem, onSelectItem, onClearList }) {
+function PackingList({
+  items,
+  onRemoveItem,
+  onSelectItem,
+  onClearList,
+  showError,
+}) {
   const [sortBy, setSortBy] = useState("packed");
 
   let sortedItems;
@@ -112,6 +119,16 @@ function PackingList({ items, onRemoveItem, onSelectItem, onClearList }) {
         ))}
       </ul>
 
+      <div className={`error ${showError ? "show" : ""}`}>
+        <p>The list is already empty!</p>
+      </div>
+      <ToastContainer
+        type="warning"
+        autoClose={4000}
+        position="bottom-right"
+        hideProgressBar={true}
+        className="toast"
+      />
       <div className="actions">
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="input">Sort by input order</option>
