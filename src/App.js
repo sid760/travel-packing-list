@@ -2,6 +2,7 @@ import { useState } from "react";
 
 export default function App() {
   const [items, setItems] = useState([]);
+  const [showError, setShowError] = useState(false);
 
   function handleAddItems(item) {
     // console.log("in handleAddItem() ===>", [...items, item]);
@@ -21,6 +22,13 @@ export default function App() {
   }
 
   function handleClearList() {
+    if (items.length === 0) {
+      setShowError(true);
+      setTimeout(() => {
+        setShowError(false);
+      }, 4000);
+      return;
+    }
     setItems((items) => []);
   }
 
@@ -33,6 +41,7 @@ export default function App() {
         onRemoveItem={handleRemoveItems}
         onSelectItem={handleSelectItem}
         onClearList={handleClearList}
+        showError={showError}
       />
       <Stats items={items} />
     </div>
@@ -83,7 +92,13 @@ function Form({ onAddItems }) {
     </form>
   );
 }
-function PackingList({ items, onRemoveItem, onSelectItem, onClearList }) {
+function PackingList({
+  items,
+  onRemoveItem,
+  onSelectItem,
+  onClearList,
+  showError,
+}) {
   const [sortBy, setSortBy] = useState("packed");
 
   let sortedItems;
@@ -112,6 +127,9 @@ function PackingList({ items, onRemoveItem, onSelectItem, onClearList }) {
         ))}
       </ul>
 
+      <div className={`error ${showError ? "show" : ""}`}>
+        <p>The list is already empty!</p>
+      </div>
       <div className="actions">
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="input">Sort by input order</option>
