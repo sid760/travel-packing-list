@@ -7,6 +7,10 @@ const initialItems = [
 
 @import url("https://fonts.googleapis.com/css2?family=Monoton&family=Quicksand:wght@500;700&display=swap");
 
+:root {
+  --toastify-color-light: #f4a226;
+}
+
 * {
   margin: 0;
   padding: 0;
