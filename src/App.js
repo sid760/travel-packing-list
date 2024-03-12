@@ -1,11 +1,13 @@
 import { useState } from "react";
+import React from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   const [items, setItems] = useState([]);
-  const [showError, setShowError] = useState(false);
+  const notify = () => toast.error("The list is already empty!");
 
   function handleAddItems(item) {
-    // console.log("in handleAddItem() ===>", [...items, item]);
     setItems((items) => [...items, item]);
   }
 
@@ -23,17 +25,17 @@ export default function App() {
 
   function handleClearList() {
     if (items.length === 0) {
-      setShowError(true);
-      setTimeout(() => {
-        setShowError(false);
-      }, 4000);
-      return;
+      notify(); // if the list is empty show a toast
+    } else {
+      // if the list is not empty, show a confirm dialog
+      let clear = window.confirm("Are you sure you want to clear the list?");
+      if (clear) setItems((items) => []);
     }
-    setItems((items) => []);
   }
 
   return (
     <div className="app">
+      {/* breaking down the app into smaller components: Logo, Form, PackingList, Stats */}
       <Logo />
       <Form onAddItems={handleAddItems} />
       <PackingList
@@ -41,35 +43,36 @@ export default function App() {
         onRemoveItem={handleRemoveItems}
         onSelectItem={handleSelectItem}
         onClearList={handleClearList}
-        showError={showError}
       />
       <Stats items={items} />
     </div>
   );
 }
 
+// Logo component
 function Logo() {
   return <h1>🌴 Far Away 💼</h1>;
 }
+
+// Form component
 function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
 
   function handleSubmit(e) {
     e.preventDefault();
-    // console.log(e.target);
-    if (description.length === 0) return;
+    if (description.length === 0) return; // if the input is empty, do nothing
     const newItem = {
+      // create a new item
       description,
       quantity,
       id: Date.now(),
       packed: false,
     };
 
-    onAddItems(newItem);
-    console.log(newItem);
-    setDescription("");
-    setQuantity(1);
+    onAddItems(newItem); // call the onAddItems function from the parent component
+    setDescription(""); // reset the input
+    setQuantity(1); // reset the quantity
   }
 
   return (
@@ -92,24 +95,20 @@ function Form({ onAddItems }) {
     </form>
   );
 }
-function PackingList({
-  items,
-  onRemoveItem,
-  onSelectItem,
-  onClearList,
-  showError,
-}) {
+
+// PackingList component
+function PackingList({ items, onRemoveItem, onSelectItem, onClearList }) {
   const [sortBy, setSortBy] = useState("packed");
 
   let sortedItems;
-
+  // sort the items based on the selected option
   if (sortBy === "input") sortedItems = items;
-
+  // if the user selects "input", keep the items in the order they were added
   if (sortBy === "description")
     sortedItems = items
       .slice()
       .sort((a, b) => a.description.localeCompare(b.description));
-
+  // if the user selects "description", sort the items by description
   if (sortBy === "packed")
     sortedItems = items
       .slice()
@@ -127,9 +126,14 @@ function PackingList({
         ))}
       </ul>
 
-      <div className={`error ${showError ? "show" : ""}`}>
-        <p>The list is already empty!</p>
-      </div>
+      {/* the toast message when the list is already empty and user clears the list */}
+      <ToastContainer
+        type="warning"
+        autoClose={4000}
+        position="bottom-right"
+        hideProgressBar={true}
+        className="toast"
+      />
       <div className="actions">
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="input">Sort by input order</option>
@@ -141,6 +145,8 @@ function PackingList({
     </div>
   );
 }
+
+// Stats component
 function Stats({ items }) {
   const numItems = items.length;
   const numPacked = items.filter((item) => item.packed).length;
@@ -154,13 +160,21 @@ function Stats({ items }) {
 
   return (
     <footer className="stats">
-      <em>
-        🧳You have {numItems} items on your list, and you already packed{" "}
-        {numPacked} ({((numPacked * 100) / numItems).toPrecision(3)}%)
-      </em>
+      {numPacked === numItems ? (
+        <b style={{ textTransform: "uppercase" }}>
+          🎉You have packed all the items, You are ready to roll! ✅
+        </b>
+      ) : (
+        <em>
+          🧳You have {numItems} items on your list, and you already packed{" "}
+          {numPacked} ({((numPacked * 100) / numItems).toPrecision(3)}%)
+        </em>
+      )}
     </footer>
   );
 }
+
+// Item sub-component
 function Item({ item, onRemoveItem, onSelectItem }) {
   return (
     <li>
