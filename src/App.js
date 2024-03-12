@@ -2,6 +2,7 @@ import { useState } from "react";
 
 export default function App() {
   const [items, setItems] = useState([]);
+  const [showError, setShowError] = useState(false);
 
   function handleAddItems(item) {
     // console.log("in handleAddItem() ===>", [...items, item]);
@@ -21,6 +22,13 @@ export default function App() {
   }
 
   function handleClearList() {
+    if (items.length === 0) {
+      setShowError(true);
+      setTimeout(() => {
+        setShowError(false);
+      }, 4000);
+      return;
+    }
     setItems((items) => []);
   }
 
@@ -122,13 +130,6 @@ function PackingList({
       <div className={`error ${showError ? "show" : ""}`}>
         <p>The list is already empty!</p>
       </div>
-      <ToastContainer
-        type="warning"
-        autoClose={4000}
-        position="bottom-right"
-        hideProgressBar={true}
-        className="toast"
-      />
       <div className="actions">
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
           <option value="input">Sort by input order</option>
